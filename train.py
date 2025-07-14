@@ -1,10 +1,7 @@
-# train.py
 from ultralytics import YOLO
 
-# Load the base YOLOv8 model
 model = YOLO("yolov8n.pt")
 
-# Train: save a checkpoint every 5 epochs
 model.train(
     data="data.yaml",   # path to your data config
     epochs=30,          # total number of epochs

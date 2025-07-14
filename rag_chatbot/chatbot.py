@@ -1,4 +1,3 @@
-# rag_chatbot/chatbot.py
 import os
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -9,21 +8,21 @@ from langchain.prompts import PromptTemplate
 from langchain.llms import HuggingFacePipeline
 from transformers import pipeline
 
-# 1) Load and split the knowledge base
+# Load and split the knowledge base
 def init_chatbot():
     HERE = os.path.dirname(__file__)
-    KB_PATH = os.path.join(HERE, "coffee_diseases.txt")  # ensure this file exists in rag_chatbot/
+    KB_PATH = os.path.join(HERE, "coffee_diseases.txt") 
     loader = TextLoader(KB_PATH)
     docs = loader.load()
     splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=50)
     split_docs = splitter.split_documents(docs)
 
-    # 2) Build FAISS retriever (k=5)
+    # FAISS retriever
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectordb = FAISS.from_documents(split_docs, embeddings)
     retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
-    # 3) Load the LLM pipeline (Google FLAN-T5-Small)
+    # Loading the LLM pipeline for Google FLAN-T5-Small
     model_id = "google/flan-t5-small"
     gen_pipe = pipeline(
         "text2text-generation",
@@ -35,7 +34,7 @@ def init_chatbot():
     )
     llm = HuggingFacePipeline(pipeline=gen_pipe)
 
-    # 4) Custom prompt for detailed multi-sentence answers
+    # Propmt for the RetrievalQA chain
     prompt = PromptTemplate(
         input_variables=["context", "question"],
         template=(
@@ -50,7 +49,7 @@ def init_chatbot():
         )
     )
 
-    # 5) Build RetrievalQA chain
+    #Building RetrievalQA chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,

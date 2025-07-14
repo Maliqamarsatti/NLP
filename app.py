@@ -1,10 +1,8 @@
-# app.py
-
 import streamlit as st
 from PIL import Image
 from ultralytics import YOLO
 
-# 1) Try to import our RAG assistant, catching any errors
+# for any errors for ragchatbot
 try:
     from rag_chatbot.chatbot import init_chatbot, ask_question
     RAG_AVAILABLE = True
@@ -15,24 +13,24 @@ except Exception as e:
 st.set_page_config(page_title="Coffee Leaf Disease Detector & Assistant", layout="centered")
 st.title("☕ Coffee Leaf Disease Detection & RAG Assistant 🌿")
 
-# 2) Show any import/init errors up front
+# for any import errors
 if not RAG_AVAILABLE:
     st.error("🔴 Could not load the RAG assistant:\n\n" + INIT_ERROR)
     st.stop()
 
-# 3) Load YOLOv8 model (make sure you have yolov8n.pt in this folder)
+# 3) Load YOLOv8 model
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
 
 model = load_model()
 
-# 4) Initialize the chatbot (this will block until done)
+# 4) Initialize the chatbot 
 with st.spinner("Loading the RAG assistant (this may take ~30s)…"):
     qa_chain = init_chatbot()
 st.success("✅ RAG assistant ready!")
 
-# 5) Image upload + detection
+# image uploading and detection
 st.header("1️⃣ Upload a Coffee Leaf Image")
 uploaded_file = st.file_uploader("Choose an image…", type=["jpg","jpeg","png"])
 if uploaded_file:
@@ -47,14 +45,14 @@ if uploaded_file:
     if dets:
         diseases = sorted(set(dets))
         st.success(f"Detected disease(s): {', '.join(diseases)}")
-        # Auto‐generate a remedy
+        # for remedy generation
         prompt = f"What is {', '.join(diseases)} on coffee leaves and how should it be treated?"
         with st.spinner("Generating remedy…"):
             remedy = ask_question(prompt, qa_chain)
         st.subheader("💊 Suggested Remedy")
         st.write(remedy)
 
-        # Follow‐up Q&A
+        # for follow up Q&A
         st.markdown("---")
         st.header("2️⃣ Ask a Follow-up Question")
         q = st.text_input("Your question about treatment, prevention, etc.")
@@ -66,7 +64,7 @@ if uploaded_file:
     else:
         st.info("No disease detected — leaf looks healthy! 🎉")
 
-# 6) Sidebar instructions
+# Sidebar
 with st.sidebar:
     st.markdown("## 📋 How to Use")
     st.markdown(
